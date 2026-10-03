@@ -75,16 +75,19 @@ Open **http://localhost:5173** in your browser.
 ## 🌐 Production Deployment Guide
 
 This project is pre-configured for a split cloud deployment:
-* **Backend:** Render Web Service (Node.js/Express + Persistent SQLite Disk + Outbox Worker)
+* **Backend:** Render Web Service (Free Tier, Node.js/Express + SQLite + Outbox Worker)
 * **Frontend:** Vercel (React/Vite SPA)
 
-### 1. Backend Deployment (Render)
+### 1. Backend Deployment (Render - Free Tier)
+
+> [!NOTE]
+> **Ephemeral Storage on Free Plan:** Render's Free Web Service plan does not support persistent disks. This deployment uses a writable local path (`/tmp/newtonite.db`). If the free instance spins down due to inactivity or restarts during a redeploy, SQLite storage resets. The backend automatically detects an empty database on boot and immediately seeds initial users, teams, and sample operational work items, ensuring the demo application is always functional and ready to test.
 
 #### Option A: 1-Click Blueprint (Recommended)
-This repository includes a `render.yaml` blueprint.
+This repository includes a `render.yaml` blueprint configured for Render's Free tier (`plan: free`):
 1. Connect your Git repository in the [Render Dashboard](https://dashboard.render.com).
 2. Select **Blueprints** → **New Blueprint Instance**.
-3. Render will provision the web service, configure environment variables, and mount the persistent disk automatically.
+3. Render will provision the free web service with all environment variables automatically (no persistent disk or credit card required).
 
 #### Option B: Manual Web Service Configuration
 1. In Render, click **New +** → **Web Service**.
@@ -92,20 +95,18 @@ This repository includes a `render.yaml` blueprint.
    * **Name:** `newtonite-ops-backend`
    * **Root Directory:** `server`
    * **Runtime:** `Node`
+   * **Instance Type:** `Free`
    * **Build Command:** `npm install && npm run build`
    * **Start Command:** `npm start`
-3. Under **Disks** (Requires Render Starter/Standard plan):
-   * **Name:** `newtonite-sqlite-data`
-   * **Mount Path:** `/var/data`
-   * **Size:** `1 GB` (or larger)
+3. Under **Disks**: None (no persistent disk needed).
 4. Under **Environment Variables**, add:
    * `NODE_ENV` = `production`
    * `PORT` = `10000` *(Render sets this automatically)*
-   * `DB_PATH` = `/var/data/newtonite.db`
+   * `DB_PATH` = `/tmp/newtonite.db`
    * `CORS_ORIGIN` = `https://your-app.vercel.app` *(or `*` to allow all origins)*
 5. Click **Deploy Web Service**.
    * Note your backend URL: `https://newtonite-ops-backend.onrender.com`.
-   * The server automatically initializes schema tables, composite indexes, starts the background Outbox worker, and seeds initial data on first boot if the database is empty.
+   * The server automatically initializes schema tables, composite indexes, starts the background Outbox worker, and seeds initial data on first boot.
 
 ---
 

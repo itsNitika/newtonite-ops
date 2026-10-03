@@ -2,6 +2,7 @@ services:
   - type: web
     name: newtonite-ops-backend
     runtime: node
+    plan: free
     rootDir: server
     buildCommand: npm install && npm run build
     startCommand: npm start
@@ -9,10 +10,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: DB_PATH
-        value: /var/data/newtonite.db
+        value: /tmp/newtonite.db
       - key: CORS_ORIGIN
         value: "*"
-    disk:
-      name: newtonite-sqlite-data
-      mountPath: /var/data
-      sizeGB: 1
