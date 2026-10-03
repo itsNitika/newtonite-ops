@@ -6,13 +6,18 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// In-memory or file database based on environment
-const DB_PATH = process.env.NODE_ENV === 'test' 
-  ? ':memory:' 
-  : process.env.DB_PATH || path.join(__dirname, '../../newtonite.db');
+export function getDatabasePath(): string {
+  if (process.env.NODE_ENV === 'test') {
+    return ':memory:';
+  }
+  if (process.env.DB_PATH) {
+    return path.resolve(process.env.DB_PATH);
+  }
+  return path.join(__dirname, '../../newtonite.db');
+}
 
 export function createDbConnection(customPath?: string): Database.Database {
-  const targetPath = customPath || DB_PATH;
+  const targetPath = customPath || getDatabasePath();
   
   if (targetPath !== ':memory:') {
     const dir = path.dirname(targetPath);

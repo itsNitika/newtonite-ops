@@ -35,6 +35,15 @@ export function getActiveUser(): string {
   return stored || activeUserId;
 }
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+function buildUrl(path: string): string {
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  return `${API_BASE_URL}${path}`;
+}
+
 function generateIdempotencyKey(): string {
   return 'idem-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now();
 }
@@ -56,7 +65,7 @@ async function request<T>(
     }
   }
 
-  const res = await fetch(url, {
+  const res = await fetch(buildUrl(url), {
     ...options,
     headers
   });

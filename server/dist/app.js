@@ -9,9 +9,16 @@ import { createEventsRouter } from './routes/events.js';
 import { createOutboxRouter } from './routes/outbox.js';
 export function createApp(db, worker) {
     const app = express();
-    // Basic Middleware
+    // CORS configuration supporting deployed frontend origin and local dev
+    const corsOrigin = process.env.CORS_ORIGIN
+        ? (process.env.CORS_ORIGIN.includes(',')
+            ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
+            : process.env.CORS_ORIGIN.trim())
+        : true; // Reflect request origin if not explicitly restricted
     app.use(cors({
-        origin: '*',
+        origin: corsOrigin,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'x-user-id'],
         exposedHeaders: ['X-Idempotent-Replay', 'X-Cache-Lookup']
     }));
     app.use(express.json());

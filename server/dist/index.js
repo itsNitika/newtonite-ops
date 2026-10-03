@@ -3,7 +3,8 @@ import { initializeSchema } from './db/schema.js';
 import { seedDatabase } from './db/seed.js';
 import { OutboxWorker } from './domain/outboxWorker.js';
 import { createApp } from './app.js';
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
+const HOST = '0.0.0.0';
 async function bootstrap() {
     const db = getDb();
     // Ensure tables and indexes are initialized
@@ -18,10 +19,10 @@ async function bootstrap() {
     const outboxWorker = new OutboxWorker(db);
     outboxWorker.start(3000); // Check outbox and SLA alerts every 3 seconds
     const app = createApp(db, outboxWorker);
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, HOST, () => {
         console.log(`=================================================`);
         console.log(`🚀 Newtonite Operations Platform Backend`);
-        console.log(`📡 Server running on http://localhost:${PORT}`);
+        console.log(`📡 Server running on http://${HOST}:${PORT}`);
         console.log(`⚡ Outbox Background Worker: ACTIVE`);
         console.log(`🔔 Realtime SSE Bus: ACTIVE`);
         console.log(`=================================================`);

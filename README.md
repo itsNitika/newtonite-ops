@@ -72,6 +72,59 @@ Open **http://localhost:5173** in your browser.
 
 ---
 
+## 🌐 Production Deployment Guide
+
+This project is pre-configured for a split cloud deployment:
+* **Backend:** Render Web Service (Node.js/Express + Persistent SQLite Disk + Outbox Worker)
+* **Frontend:** Vercel (React/Vite SPA)
+
+### 1. Backend Deployment (Render)
+
+#### Option A: 1-Click Blueprint (Recommended)
+This repository includes a `render.yaml` blueprint.
+1. Connect your Git repository in the [Render Dashboard](https://dashboard.render.com).
+2. Select **Blueprints** → **New Blueprint Instance**.
+3. Render will provision the web service, configure environment variables, and mount the persistent disk automatically.
+
+#### Option B: Manual Web Service Configuration
+1. In Render, click **New +** → **Web Service**.
+2. Select your repository and configure:
+   * **Name:** `newtonite-ops-backend`
+   * **Root Directory:** `server`
+   * **Runtime:** `Node`
+   * **Build Command:** `npm install && npm run build`
+   * **Start Command:** `npm start`
+3. Under **Disks** (Requires Render Starter/Standard plan):
+   * **Name:** `newtonite-sqlite-data`
+   * **Mount Path:** `/var/data`
+   * **Size:** `1 GB` (or larger)
+4. Under **Environment Variables**, add:
+   * `NODE_ENV` = `production`
+   * `PORT` = `10000` *(Render sets this automatically)*
+   * `DB_PATH` = `/var/data/newtonite.db`
+   * `CORS_ORIGIN` = `https://your-app.vercel.app` *(or `*` to allow all origins)*
+5. Click **Deploy Web Service**.
+   * Note your backend URL: `https://newtonite-ops-backend.onrender.com`.
+   * The server automatically initializes schema tables, composite indexes, starts the background Outbox worker, and seeds initial data on first boot if the database is empty.
+
+---
+
+### 2. Frontend Deployment (Vercel)
+
+1. In the [Vercel Dashboard](https://vercel.com/new), import your Git repository.
+2. Configure the project settings:
+   * **Framework Preset:** `Vite`
+   * **Root Directory:** `client`
+   * **Build Command:** `npm run build`
+   * **Output Directory:** `dist`
+3. Under **Environment Variables**, add:
+   * `VITE_API_URL` = `https://your-backend.onrender.com` *(your Render backend service URL)*
+4. Click **Deploy**.
+   * Single-page routing rewrites are handled automatically via `client/vercel.json`.
+   * Real-time Server-Sent Events (SSE) stream will connect to `${VITE_API_URL}/api/events/subscribe`.
+
+---
+
 ## 🧪 Running Automated Tests
 
 A comprehensive Vitest test suite covers all critical edge cases, race conditions, and failure modes:

@@ -17,7 +17,8 @@ export function useSSE(onEvent?: (event: SSEEvent) => void) {
 
     const connect = () => {
       try {
-        es = new EventSource('/api/events/subscribe');
+        const baseUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+        es = new EventSource(`${baseUrl}/api/events/subscribe`);
         eventSourceRef.current = es;
 
         es.onopen = () => {
