@@ -1,0 +1,14 @@
+{
+  "name": "newtonite-operations-platform",
+  "version": "1.0.0",
+  "description": "Newtonite Operations Under Pressure - Coordination & Management Platform",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "test": "npm --prefix server test",
+    "seed": "npm --prefix server run seed",
+    "build": "npm --prefix server run build && npm --prefix client run build"
+  }
+}
