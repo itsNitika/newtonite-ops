@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+newtonite.db
+newtonite.db-wal
+newtonite.db-shm
+.DS_Store
+*.tsbuildinfo
